@@ -1,0 +1,14 @@
+alias: Notify on new weather alerts
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.my_region_alert_count
+    above: 0
+condition: []
+action:
+  - service: notify.mobile_app_your_phone
+    data:
+      title: Weather Alert
+      message: "{{ states('sensor.my_region_alert_summary') }}"
+      data:
+        url: "{{ state_attr('sensor.my_region_alert_count', 'url') }}"
+mode: single

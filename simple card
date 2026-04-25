@@ -1,0 +1,100 @@
+type: custom:mod-card
+card_mod:
+  style: >
+    {% set warn = state_attr('sensor.newmarket_environment_canada_warnings',
+    'alert_1') | string + " " +
+    state_attr('sensor.newmarket_environment_canada_warnings', 'alert_2') | string
+    %}  {% set watch = state_attr('sensor.newmarket_environment_canada_watches',
+    'alert_1') | string + " " +
+    state_attr('sensor.newmarket_environment_canada_watches', 'alert_2') | string
+    %}  {% set adv = state_attr('sensor.newmarket_environment_canada_advisory',
+    'alert_1') | string + " " +
+    state_attr('sensor.newmarket_environment_canada_advisory', 'alert_2') | string
+    %}  {% set stat = state_attr('sensor.newmarket_environment_canada_statements',
+    'alert_1') | string + " " +
+    state_attr('sensor.newmarket_environment_canada_statements', 'alert_2') |
+    string %}  {% set combined = warn + " " + watch + " " + adv + " " + stat %}
+
+    {% if combined and 'None' not in combined or combined | trim != "" %}
+      {% set color = 'red' if 'Red' in combined 
+                else 'orange' if 'Orange' in combined 
+                else 'yellow' if 'Yellow' in combined 
+                else 'grey' if 'Statement' in combined or (stat and 'None' not in stat)
+                else none %}
+      {% set pulse_speed = '1s' if 'Red' in combined 
+                      else '2s' if 'Orange' in combined 
+                      else '3s' if 'Yellow' in combined
+                      else '0s' %}
+      
+      ha-card {
+        {% if color and color != 'grey' %} animation: pulse {{ pulse_speed }} infinite; {% endif %}
+        background: {{ 'rgba(255, 0, 0, 0.2)' if color == 'red' 
+                       else 'rgba(255, 165, 0, 0.2)' if color == 'orange' 
+                       else 'rgba(255, 255, 0, 0.2)' if color == 'yellow' 
+                       else 'rgba(128, 128, 128, 0.2)' if color == 'grey' 
+                       else 'none' }};
+        border: 2px solid {{ color if color else 'transparent' }};
+      }
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0px {{ color }}; }
+        70% { box-shadow: 0 0 0 15px rgba(0, 0, 0, 0); }
+        100% { box-shadow: 0 0 0 0px rgba(0, 0, 0, 0); }
+      }
+    {% endif %}
+card:
+  type: custom:auto-entities
+  show_empty: false
+  card:
+    type: entities
+    theme: Dark
+    card_mod:
+      style: >
+        ha-card { background: none !important; border: none !important;
+        box-shadow: none !important; font-size: larger !important} .card-content
+        { padding: 8px !important; }
+  filter:
+    template: |
+      {% set sensors = [
+        'sensor.newmarket_environment_canada_warnings',
+        'sensor.newmarket_environment_canada_watches',
+        'sensor.newmarket_environment_canada_advisory',
+        'sensor.newmarket_environment_canada_statements'
+      ] %}
+
+      {% set ns = namespace(rows=[]) %}
+
+      {% for s in sensors %}
+        {% for i in range(1, 5) %}
+          {% set attr = 'alert_' ~ i %}
+          {% set text = state_attr(s, attr) %}
+          {% if text and text != 'None' and text | trim != "" %}
+            
+            {# Define sorting weights: Color first, then Type #}
+            {% set color_prio = 10 if 'Red' in text else 20 if 'Orange' in text else 30 if 'Yellow' in text else 40 %}
+            {% set type_prio = 1 if 'warnings' in s else 2 if 'watches' in s else 3 if 'advisory' in s else 4 %}
+            {% set sort_score = color_prio + type_prio %}
+
+            {% set row_color = 'red' if 'Red' in text else 'orange' if 'Orange' in text else 'yellow' if 'Yellow' in text else 'grey' %}
+            {% set row_icon = 'mdi:alert' if row_color == 'red' else 'mdi:alert-rhombus' if row_color == 'orange' else 'mdi:alert-circle' if row_color == 'yellow' else 'mdi:alert-box' %}
+            
+            {% set ns.rows = ns.rows + [{
+              "sort_by": sort_score,
+              "type": "attribute",
+              "attribute": "hide_state",
+              "entity": s,
+              "name": text,
+              "icon": row_icon,
+              "tap_action": {
+                "action": "url",
+                "url_path": "https://weather.gc.ca/warnings/report_e.html?onrm28"
+              },
+              "card_mod": {
+                "style": "state-badge { color: " ~ row_color ~ " !important; } :host { --card-mod-icon-color: " ~ row_color ~ "; }"
+              }
+            }] %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+
+      {# This sorts by the combined color + type score #}
+      {{ ns.rows | sort(attribute='sort_by') }}

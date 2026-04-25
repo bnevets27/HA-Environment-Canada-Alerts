@@ -1,0 +1,7 @@
+type: markdown
+title: Weather Alerts
+content: >
+  {{ state_attr('sensor.my_region_alert_summary', 'summary_md')
+     | default('No alerts in effect.', true) }}
+entity_id: sensor.my_region_alert_summary
+

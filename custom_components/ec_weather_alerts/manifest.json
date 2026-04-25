@@ -1,0 +1,13 @@
+{
+  "domain": "ec_weather_alerts",
+  "name": "Environment Canada Weather Alerts",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/YOUR_GITHUB_USERNAME/ha-environment-canada-alerts",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/YOUR_GITHUB_USERNAME/ha-environment-canada-alerts/issues",
+  "loggers": ["custom_components.ec_weather_alerts"],
+  "requirements": [],
+  "version": "1.0.0"
+}

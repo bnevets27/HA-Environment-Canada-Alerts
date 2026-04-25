@@ -1,0 +1,25 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Environment Canada Weather Alerts",
+        "description": "Set up your Environment Canada weather alerts region.\n\n**How to find your zone code:**\n1. Go to [weather.gc.ca](https://weather.gc.ca/index_e.html?layers=alert)\n2. Open the alert map or search for your city, then open your region page\n3. Look at the URL. It will look like:\n   `https://weather.gc.ca/warnings/report_e.html?nl18=`\n4. Your zone code is the part before the `=` sign (for example `nl18`)\n\nYou can paste the full warning URL or just the zone code.",
+        "data": {
+          "zone_code": "Zone Code or URL",
+          "friendly_name": "Friendly Name (optional)"
+        },
+        "data_description": {
+          "zone_code": "The EC zone code (for example `nl18`) or the full URL from weather.gc.ca/warnings/report_e.html",
+          "friendly_name": "Optional. If left blank, the official Environment Canada region name is used."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to Environment Canada. Please try again.",
+      "invalid_zone_code": "Invalid zone code or warning URL. Please check the value and try again."
+    },
+    "abort": {
+      "already_configured": "This zone is already configured."
+    }
+  }
+}

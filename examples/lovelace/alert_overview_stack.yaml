@@ -1,0 +1,24 @@
+type: markdown
+title: Weather Alerts
+content: >
+  {% set count = states('sensor.my_region_alert_count') | int(0) %}
+  {% if count > 0 %}
+  **{{ count }} active alert{{ 's' if count != 1 else '' }}**
+  (Highest: {{ states('sensor.my_region_max_alert_level') }})
+
+  {{ state_attr('sensor.my_region_alert_summary', 'summary_md') }}
+
+  <details>
+  <summary>View details</summary>
+
+  {{ state_attr('sensor.my_region_alert_detail', 'detail_md') }}
+  </details>
+  {% else %}
+  No alerts in effect.
+  {% endif %}
+entity_id:
+  - sensor.my_region_alert_count
+  - sensor.my_region_alert_summary
+  - sensor.my_region_alert_detail
+  - sensor.my_region_max_alert_level
+
